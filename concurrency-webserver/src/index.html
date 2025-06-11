@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Prueba de Concurrencia Visual</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .bar-container {
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            width: 100%;
+            height: 20px;
+        }
+
+        .bar {
+            height: 100%;
+            width: 0;
+            background-color: #4CAF50;
+            transition: width 0.1s linear;
+        }
+
+        .label {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🌐 Prueba de Concurrencia Visual</h1>
+    <p>Solicitando <strong>spin.cgi?3</strong> múltiples veces para ver concurrencia.</p>
+    <div id="bars"></div>
+
+    <script>
+        const numRequests = 8;
+        const duration = 3000; // 3 segundos = spin.cgi?3
+        const barsDiv = document.getElementById('bars');
+
+        for (let i = 0; i < numRequests; i++) {
+            // Crear elementos visuales
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.textContent = `Petición #${i + 1}`;
+
+            const barContainer = document.createElement('div');
+            barContainer.className = 'bar-container';
+
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+
+            barContainer.appendChild(bar);
+            barsDiv.appendChild(label);
+            barsDiv.appendChild(barContainer);
+
+            // Iniciar la animación de la barra
+            let startTime = null;
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = timestamp - startTime;
+                const percent = Math.min((progress / duration) * 100, 100);
+                bar.style.width = percent + '%';
+
+                if (progress < duration) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            requestAnimationFrame(animate);
+
+            // Hacer la petición
+            fetch(`/cgi-bin/spin.cgi?3`)
+                .then(res => res.text())
+                .then(() => {
+                    bar.style.backgroundColor = '#2196F3'; // Azul al terminar
+                });
+        }
+    </script>
+</body>
+
+</html>
