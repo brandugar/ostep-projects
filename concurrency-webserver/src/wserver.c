@@ -7,11 +7,24 @@
 char default_root[] = ".";
 request_buffer_t conn_buffer;
 
+double get_seconds()
+{
+	struct timeval t;
+	int rc = gettimeofday(&t, NULL);
+	assert(rc == 0);
+	return (double)((double)t.tv_sec + (double)t.tv_usec / 1e6);
+}
+
 void *worker_thread(void *arg)
 {
 	while (1)
 	{
 		int connfd = buffer_remove(&conn_buffer);
+		double time1 = get_seconds();
+		while ((get_seconds() - time1) < 3)
+		{
+			sleep(1);
+		}
 		request_handle(connfd);
 		close_or_die(connfd);
 	}
